@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#3b101d">
+<title>Letter with Love</title>
+<style>
+  :root {
+    --wine: #3b101d;
+    --wine-deep: #260911;
+    --burgundy: #681f32;
+    --rose: #b66b72;
+    --paper: #f1e3c7;
+    --paper-light: #f8efdE;
+    --ink: #49312d;
+    --muted-ink: #80675a;
+    --gold: #b58a55;
+    --shadow: rgba(15, 4, 8, .35);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--paper);
+    background:
+      radial-gradient(ellipse at 50% 38%, rgba(128, 43, 61, .38), transparent 55%),
+      radial-gradient(ellipse at 12% 90%, rgba(91, 22, 39, .35), transparent 40%),
+      linear-gradient(145deg, #260911, #451321 52%, #2b0b15);
+    font-family: Georgia, "Times New Roman", serif;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .13;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+    z-index: 10;
+  }
+
+  button { font: inherit; }
+  .screen {
+    min-height: 100svh;
+    width: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 34px 18px;
+    position: relative;
+    isolation: isolate;
+  }
+  .screen.active { display: flex; animation: screenIn .85s ease both; }
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .intro-wrap { width: min(100%, 560px); text-align: center; }
+  .eyebrow {
+    color: #d6b88d;
+    font: 11px/1.6 Arial, sans-serif;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    margin: 0 0 22px;
+  }
+  .intro-title {
+    font-size: clamp(30px, 6vw, 48px);
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.15;
+    margin: 0 0 10px;
+    color: #f4e6cf;
+  }
+  .intro-subtitle {
+    color: #d3bca5;
+    font-size: 15px;
+    letter-spacing: .025em;
+    margin: 0 0 35px;
+  }
+
+  .envelope-stage {
+    width: min(100%, 430px);
+    height: 275px;
+    margin: 0 auto 28px;
+    position: relative;
+    perspective: 1000px;
+    filter: drop-shadow(0 24px 24px rgba(0,0,0,.27));
+  }
+  .envelope {
+    position: absolute;
+    inset: 35px 12px 10px;
+    border-radius: 5px;
+    background: linear-gradient(150deg, #f5e8ce, #d9c39e);
+    box-shadow: inset 0 0 0 1px rgba(111,75,48,.25), inset 0 0 24px rgba(100,62,36,.12);
+    overflow: hidden;
+  }
+  .envelope::before, .envelope::after {
+    content: "";
+    position: absolute;
+    width: 0; height: 0;
+    border-left: 203px solid transparent;
+    border-right: 203px solid transparent;
+    z-index: 2;
+  }
+  .envelope::before {
+    top: 0; left: 0;
+    border-top: 142px solid #ead9b8;
+    filter: drop-shadow(0 2px 2px rgba(91,57,34,.16));
+  }
+  .envelope::after {
+    bottom: 0; left: 0;
+    border-bottom: 150px solid #dfcba7;
+    border-left-width: 203px;
+    border-right-width: 203px;
+  }
+  .envelope-side {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(35deg, transparent 49.7%, rgba(122,83,53,.16) 50%, transparent 50.4%),
+                linear-gradient(-35deg, transparent 49.7%, rgba(122,83,53,.12) 50%, transparent 50.4%);
+  }
+  .letter-peek {
+    position: absolute;
+    z-index: 1;
+    width: 74%;
+    height: 80%;
+    left: 13%;
+    top: 0;
+    background: #f8efdc;
+    box-shadow: 0 0 12px rgba(70,42,25,.14);
+  }
+  .seal-button {
+    position: absolute;
+    z-index: 5;
+    left: 50%; top: 51%;
+    transform: translate(-50%, -50%);
+    width: 88px; height: 88px;
+    border: 0;
+    border-radius: 50%;
+    color: #f2c9b5;
+    cursor: pointer;
+    background:
+      radial-gradient(circle at 32% 25%, #a94c5b 0, #81263b 32%, #5d1429 72%, #3e0d1b 100%);
+    box-shadow: 0 5px 9px rgba(36,6,15,.35), inset 0 2px 5px rgba(255,220,210,.25), inset 0 -5px 9px rgba(26,2,10,.35);
+    outline: 1px solid rgba(210,147,135,.45);
+    outline-offset: -6px;
+    transition: transform .3s ease, filter .3s ease;
+    animation: sealTurn 8s ease-in-out infinite;
+  }
+  .seal-button:hover { filter: brightness(1.12); transform: translate(-50%, -50%) scale(1.06) rotate(-4deg); }
+  .seal-button:focus-visible, .primary-btn:focus-visible, .choice:focus-visible { outline: 2px solid #f5d7a5; outline-offset: 4px; }
+  .seal-heart { font-size: 34px; line-height: 1; display: block; text-shadow: 0 2px 2px rgba(37,4,14,.45); }
+  .seal-ring { position: absolute; inset: 9px; border: 1px solid rgba(241,190,173,.36); border-radius: 50%; }
+  @keyframes sealTurn {
+    0%, 100% { rotate: -4deg; }
+    50% { rotate: 5deg; }
+  }
+  .open-hint {
+    color: #d5bda5;
+    font: 11px Arial, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .primary-btn {
+    border: 1px solid rgba(225,190,147,.65);
+    border-radius: 999px;
+    padding: 13px 25px;
+    background: #ead9b8;
+    color: #4c1b29;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: .035em;
+    box-shadow: 0 5px 16px rgba(0,0,0,.15);
+    transition: transform .2s ease, background .2s ease;
+  }
+  .primary-btn:hover { transform: translateY(-2px); background: #f5e8ce; }
+
+  /* Letter screen */
+  #letterScreen { padding-top: 45px; padding-bottom: 55px; }
+  .paper {
+    width: min(100%, 760px);
+    position: relative;
+    padding: clamp(28px, 6vw, 64px) clamp(23px, 7vw, 76px);
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 15% 10%, rgba(255,255,255,.45), transparent 42%),
+      radial-gradient(ellipse at 90% 90%, rgba(160,116,69,.12), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(115,83,52,.025) 0, rgba(115,83,52,.025) 1px, transparent 1px, transparent 4px),
+      var(--paper);
+    border: 1px solid rgba(199,166,119,.6);
+    box-shadow: 0 22px 60px rgba(0,0,0,.35), inset 0 0 35px rgba(143,103,61,.09);
+  }
+  .paper::before {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border: 1px solid rgba(157,119,77,.19);
+    pointer-events: none;
+  }
+  .paper-kicker {
+    text-align: center;
+    color: #987750;
+    font: 10px Arial, sans-serif;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    margin-bottom: 35px;
+  }
+  .letter-greeting {
+    font-size: clamp(23px, 4vw, 29px);
+    font-weight: normal;
+    font-style: italic;
+    margin: 0 0 25px;
+    color: #593b32;
+  }
+  .letter-body {
+    font-size: clamp(16px, 2.3vw, 18px);
+    line-height: 1.9;
+    white-space: normal;
+  }
+  .letter-body p { margin: 0 0 20px; }
+  .letter-signoff { margin-top: 30px; line-height: 1.8; }
+  .letter-signoff .sign { font-style: italic; }
+  .letter-signoff .name { font-size: 22px; font-style: italic; color: #6c3440; }
+  .letter-footer {
+    margin-top: 38px;
+    padding-top: 17px;
+    border-top: 1px solid rgba(134,95,59,.24);
+    text-align: center;
+    color: #987750;
+    font: 10px Arial, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .continue-row { text-align: center; margin-top: 28px; }
+  .continue-row .primary-btn { background: #6b2638; color: #f8ead2; border-color: #9c6570; }
+
+  /* Forgiveness screen */
+  .question-wrap { width: min(100%, 620px); text-align: center; }
+  .question-paper {
+    padding: clamp(35px, 7vw, 65px) 22px;
+    color: var(--ink);
+    background: radial-gradient(ellipse at 50% 0%, #fff8e8, transparent 70%), var(--paper);
+    border: 1px solid rgba(205,174,128,.7);
+    box-shadow: 0 22px 55px rgba(0,0,0,.3), inset 0 0 30px rgba(143,103,61,.08);
+    position: relative;
+  }
+  .question-paper::before { content:""; position:absolute; inset:10px; border:1px solid rgba(157,119,77,.2); pointer-events:none; }
+  .question-kicker { color:#987750; font:10px Arial,sans-serif; letter-spacing:.24em; text-transform:uppercase; margin:0 0 20px; }
+  .question-title { color:#5a2933; font-size:clamp(30px, 6vw, 43px); font-weight:normal; font-style:italic; margin:0 0 12px; }
+  .question-copy { color:#80675a; font-size:15px; margin:0 0 35px; }
+  .choices {
+    display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+    gap:18px; min-height:80px; position:relative; z-index:1;
+  }
+  .choice {
+    border-radius:999px;
+    min-width:112px;
+    padding:13px 26px;
+    cursor:pointer;
+    font: bold 13px Arial,sans-serif;
+    letter-spacing:.08em;
+    transition: transform .25s ease, font-size .25s ease, padding .25s ease, min-width .25s ease;
+  }
+  #yesBtn { background:#70283b; color:#fff0db; border:1px solid #8e4c5c; box-shadow:0 5px 14px rgba(84,29,44,.18); }
+  #noBtn { background:transparent; color:#754a46; border:1px solid #b99c7d; }
+  .response-message {
+    min-height: 28px;
+    margin: 27px 0 0;
+    color:#7a4a46;
+    font-size:15px;
+    font-style:italic;
+    transition: opacity .2s ease;
+  }
+
+  .youtube-panel {
+  position: fixed;
+  z-index: 19;
+  right: 17px;
+  bottom: 66px;
+  width: min(320px, calc(100vw - 28px));
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(222,190,157,.38);
+  background: rgba(39,10,19,.94);
+  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+  display: none;
+}
+
+.youtube-panel.visible {
+  display: block;
+  animation: screenIn .25s ease both;
+}
+
+.youtube-panel iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 7px;
+}
+  .attempt-note { margin:12px 0 0; color:#a28a70; font:10px Arial,sans-serif; letter-spacing:.1em; }
+
+  /* Celebration */
+  #celebrationScreen { overflow:hidden; }
+  .final-paper {
+    width:min(100%, 650px);
+    padding:clamp(35px, 7vw, 66px) clamp(25px, 7vw, 70px);
+    text-align:center;
+    color:var(--ink);
+    background:radial-gradient(ellipse at 50% 0%, #fff8e8, transparent 68%), var(--paper);
+    border:1px solid rgba(205,174,128,.7);
+    box-shadow:0 22px 60px rgba(0,0,0,.32), inset 0 0 30px rgba(143,103,61,.08);
+    position:relative;
+    z-index:2;
+  }
+  .final-paper::before { content:""; position:absolute; inset:10px; border:1px solid rgba(157,119,77,.2); pointer-events:none; }
+  .final-heart { font-size:30px; color:#8a3446; margin-bottom:15px; }
+  .final-title { color:#602c38; font-size:clamp(32px,6vw,45px); font-weight:normal; font-style:italic; margin:0 0 25px; }
+  .final-message { font-size:clamp(16px,2.5vw,18px); line-height:1.9; color:#61483e; }
+  .final-message p { margin:0 0 18px; }
+  .final-close { color:#783b48; font-style:italic; margin-top:25px; }
+  .restart { margin-top:28px; background:#6b2638; color:#f8ead2; border-color:#9c6570; }
+
+  .music-control {
+    position:fixed; z-index:20; right:17px; bottom:17px;
+    display:flex; align-items:center; gap:8px;
+    padding:9px 13px; border-radius:999px;
+    border:1px solid rgba(222,190,157,.38);
+    background:rgba(39,10,19,.78); color:#f0dfc6;
+    font:11px Arial,sans-serif; letter-spacing:.04em;
+    cursor:pointer; backdrop-filter:blur(8px);
+  }
+  .music-control:disabled { opacity:.55; cursor:default; }
+  .music-dot { width:7px; height:7px; border-radius:50%; background:#b77a7e; box-shadow:0 0 8px #d89b9b; }
+  .music-control.playing .music-dot { background:#d7b178; animation:pulse 1.5s infinite; }
+  @keyframes pulse { 50% { box-shadow:0 0 0 5px rgba(215,177,120,.12); } }
+
+  .confetti {
+    position:fixed; z-index:5; top:-15px; width:8px; height:13px;
+    pointer-events:none; opacity:.95;
+    animation:fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform:translate3d(var(--drift), 110vh, 0) rotate(780deg); opacity:.15; }
+  }
+  .tiny-note { color:#c6a88e; font:10px Arial,sans-serif; letter-spacing:.1em; margin-top:22px; }
+
+  @media (max-width:520px) {
+    .screen { padding-left:14px; padding-right:14px; }
+    .envelope-stage { height:240px; }
+    .envelope { inset:30px 0 10px; }
+    .envelope::before, .envelope::after { border-left-width:50vw; border-right-width:50vw; }
+    .envelope::before { border-top-width:125px; }
+    .envelope::after { border-bottom-width:135px; }
+    .seal-button { width:78px; height:78px; }
+    .paper { padding:34px 25px; }
+    .paper::before { inset:7px; }
+    .letter-body { line-height:1.8; }
+    .choices { gap:12px; }
+    .choice { min-width:100px; padding:12px 20px; }
+    .music-control { right:12px; bottom:12px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <section class="screen active" id="introScreen" aria-label="Sealed letter">
+    <div class="intro-wrap">
+      <p class="eyebrow">A personal correspondence</p>
+      <h1 class="intro-title">A little something<br>for you, Namrata.</h1>
+      <p class="intro-subtitle">Some things deserve a letter.</p>
+
+      <div class="envelope-stage">
+        <div class="letter-peek"></div>
+        <div class="envelope">
+          <div class="envelope-side"></div>
+        </div>
+        <button class="seal-button" id="openLetter" aria-label="Break the wax seal and open the letter">
+          <span class="seal-ring"></span>
+          <span class="seal-heart">♥</span>
+        </button>
+      </div>
+      <p class="open-hint">Tap the seal to open</p>
+      <button class="primary-btn" id="openLetterText">Open your letter</button>
+      <p class="tiny-note">Made with a little more thought than usual.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="letterScreen" aria-label="The letter">
+    <div>
+      <article class="paper">
+        <div class="paper-kicker">A letter, just for you</div>
+        <h2 class="letter-greeting">Dear Namrata,</h2>
+        <div class="letter-body">
+          <p>I've been thinking abt u &amp; wanted to check on how u were doing.. I know yesterday got rather difficult, &amp; although emotions ran a little high, I don't want that to overshadow what matters to me most, which is u &amp; how u feel..</p>
+
+          <p>I've had some time to sit with everything we spoke abt yesterday, &amp; the more I've reflected on it, the more I've come to realize that where u were coming from &amp; how right u were... I realize that you had every reason to feel the way you did, &amp; I was the one who needed to look at things differently.. I feel rather guilty that I couldn't recognize that properly in the moment, because understanding u is something I genuinely want to get right..</p>
+
+          <p>It bothers me that I may have made u feel hurt &amp; misunderstood, because your feelings are something I genuinely treasure. I hope u know that I care abt understanding u, even when a conversation gets difficult, &amp; that I never want u to feel unheard by me. I value having u in my life an awful lot. I value u &amp; what we share rather deeply, &amp; I care abt how u're doing Namrata, perhaps more than I always manage to put into words. How have u been since yesterday?</p>
+        </div>
+
+        <div class="letter-signoff">
+          <div>With affection &amp; lots of love,</div>
+          <div class="name">James</div>
+        </div>
+        <div class="letter-footer">Written with care</div>
+      </article>
+      <div class="continue-row">
+        <button class="primary-btn" id="toQuestion">Turn the page</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="questionScreen" aria-label="A question">
+    <div class="question-wrap">
+      <div class="question-paper">
+        <p class="question-kicker">Before you go...</p>
+        <h2 class="question-title">So, Namrata...</h2>
+        <p class="question-copy">Do you forgive me?</p>
+        <div class="choices">
+          <button class="choice" id="yesBtn">YES ♥</button>
+          <button class="choice" id="noBtn">NO :(</button>
+        </div>
+        <p class="response-message" id="responseMessage" aria-live="polite"></p>
+        <p class="attempt-note" id="attemptNote">A little question. No pressure.</p>
+      </div>
+      <p class="tiny-note">Either way, thank you for reading.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="celebrationScreen" aria-label="A final message">
+    <article class="final-paper">
+      <div class="final-heart">♥</div>
+      <h2 class="final-title">And one last thing...</h2>
+      <div class="final-message">
+        <p>I'm glad you're here.</p>
+        <p>I don't always get everything right, but I hope you never have to wonder whether you matter to me. You do. And even on days when conversations get a little difficult, I'd still rather understand you than let a misunderstanding come between us.</p>
+      </div>
+      <p class="final-close">Take care of yourself, Namrata. ♥</p>
+      <button class="primary-btn restart" id="restartBtn">Read the letter again</button>
+    </article>
+  </section>
+</main>
+
+<div class="youtube-panel" id="youtubePanel">
+</div>
+
+<button class="music-control" id="musicButton" type="button">
+  <span class="music-dot"></span>
+  <span id="musicLabel">Play our song ♡</span>
+</button>
+
+<script>
+  /*
+    OPTIONAL MUSIC:
+    To add music, replace the empty string below with a direct URL to an audio
+    file you are allowed to use (for example, your own instrumental recording).
+    Browsers require a visitor interaction before audio can play.
+  */
+  const MUSIC_URL = "";
+
+  const screens = {
+    intro: document.getElementById("introScreen"),
+    letter: document.getElementById("letterScreen"),
+    question: document.getElementById("questionScreen"),
+    celebration: document.getElementById("celebrationScreen")
+  };
+
+  function showScreen(name) {
+    Object.values(screens).forEach(screen => screen.classList.remove("active"));
+    screens[name].classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  document.getElementById("openLetter").addEventListener("click", () => showScreen("letter"));
+  document.getElementById("openLetterText").addEventListener("click", () => showScreen("letter"));
+  document.getElementById("toQuestion").addEventListener("click", () => showScreen("question"));
+
+  const noMessages = [
+    "Are you sure? :(",
+    "I promise I've given it some thought.",
+    "Okay, I'll accept that you're considering it.",
+    "Seven chances to change your mind? Just kidding.",
+    "I'm beginning to think you're enjoying this.",
+    "One last little plea?",
+    "Alright, I'll leave the decision to you. ♥"
+  ];
+
+  let noAttempts = 0;
+  const noButton = document.getElementById("noBtn");
+  const yesButton = document.getElementById("yesBtn");
+  const responseMessage = document.getElementById("responseMessage");
+  const attemptNote = document.getElementById("attemptNote");
+
+  noButton.addEventListener("click", () => {
+    if (noAttempts >= 7) {
+      responseMessage.textContent = "I meant it. I'll leave the decision with you. ♥";
+      return;
+    }
+
+    noAttempts += 1;
+    responseMessage.textContent = noMessages[noAttempts - 1];
+
+    // The NO button gently shrinks; YES grows, but both remain usable.
+    const noScale = Math.max(0.58, 1 - noAttempts * 0.06);
+    const yesScale = Math.min(1.42, 1 + noAttempts * 0.06);
+    noButton.style.fontSize = (13 * noScale) + "px";
+    noButton.style.padding = (12 * noScale) + "px " + (26 * noScale) + "px";
+    noButton.style.minWidth = (112 * noScale) + "px";
+    yesButton.style.fontSize = (13 * yesScale) + "px";
+    yesButton.style.padding = (13 * yesScale) + "px " + (26 * yesScale) + "px";
+    yesButton.style.minWidth = (112 * yesScale) + "px";
+
+    attemptNote.textContent = noAttempts < 7
+      ? `${7 - noAttempts} little ${7 - noAttempts === 1 ? "chance" : "chances"} left (only if you want).`
+      : "That's all seven. The choice is still yours.";
+  });
+
+  yesButton.addEventListener("click", () => {
+    showScreen("celebration");
+    launchConfetti();
+    if (MUSIC_URL) startMusic();
+  });
+
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    noAttempts = 0;
+    noButton.removeAttribute("style");
+    yesButton.removeAttribute("style");
+    responseMessage.textContent = "";
+    attemptNote.textContent = "A little question. No pressure.";
+    showScreen("intro");
+  });
+
+  function launchConfetti() {
+    const pieces = 95;
+    const colours = ["#d6b47f", "#8d3449", "#f0d9b8", "#c77d83", "#6d2539"];
+    for (let i = 0; i < pieces; i++) {
+      const piece = document.createElement("span");
+      piece.className = "confetti";
+      piece.style.left = Math.random() * 100 + "vw";
+      piece.style.background = colours[Math.floor(Math.random() * colours.length)];
+      piece.style.setProperty("--drift", (Math.random() * 220 - 110) + "px");
+      piece.style.animationDuration = (3.2 + Math.random() * 3.2) + "s";
+      piece.style.animationDelay = (Math.random() * .8) + "s";
+      piece.style.borderRadius = Math.random() > .5 ? "50%" : "2px";
+      document.body.appendChild(piece);
+      piece.addEventListener("animationend", () => piece.remove());
+    }
+  }
+
+  // Optional background music controls. No audio source is bundled.
+  // YouTube background music
+const YOUTUBE_URL = "https://www.youtube.com/watch?v=WWXm39leYew";
+const YOUTUBE_VIDEO_ID = new URL(YOUTUBE_URL).searchParams.get("v");
+
+const musicButton = document.getElementById("musicButton");
+const musicLabel = document.getElementById("musicLabel");
+const youtubePanel = document.getElementById("youtubePanel");
+
+musicButton.addEventListener("click", () => {
+  if (youtubePanel.classList.contains("visible")) {
+    youtubePanel.classList.remove("visible");
+    youtubePanel.innerHTML = "";
+    musicButton.classList.remove("playing");
+    musicLabel.textContent = "Play our song ♡";
+    return;
+  }
+
+  const iframe = document.createElement("iframe");
+
+  iframe.src = `https://www.youtube-nocookie.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&rel=0&playsinline=1`;
+  iframe.title = "Our song";
+  iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+  iframe.allowFullscreen = true;
+
+  youtubePanel.appendChild(iframe);
+  youtubePanel.classList.add("visible");
+
+  musicButton.classList.add("playing");
+  musicLabel.textContent = "Close music ♡";
+});
+</script>
+</body>
+</html>
